@@ -28,9 +28,9 @@ services:
       database__connection__user: root
       database__connection__password: example
       database__connection__database: ghost
-      privacy__useUpdateCheck: false
-      privacy__useGravatar: false
-      privacy__useRpcPing: false
+      privacy__useUpdateCheck: "false"
+      privacy__useGravatar: "false"
+      privacy__useRpcPing: "false"
 
   db:
     image: mysql:5.7
