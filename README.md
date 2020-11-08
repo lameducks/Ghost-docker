@@ -21,6 +21,7 @@ services:
       - ghost-images:/var/lib/ghost/content/images
       - ghost-settings:/var/lib/ghost/content/settings
       - /mnt/ghost-overlay/post-comments.hbs:/var/lib/ghost/content/themes/casper/partials/post-comments.hbs:ro
+      - /mnt/ghost-overlay/subscribe-form.hbs:/var/lib/ghost/content/themes/casper/partials/subscribe-form.hbs:ro
     environment:
       url: http://1.2.3.4:2368
       database__client: mysql
