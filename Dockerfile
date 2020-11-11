@@ -2,7 +2,7 @@
 
 FROM node:12-alpine3.12 as build
 
-ENV GHOST_VERSION 3.37.1-mod.5
+ENV GHOST_VERSION 3.37.1-mod.6
 
 RUN apk add --no-cache git \
     && git clone --recurse-submodules https://github.com/lameducks/Ghost.git \
