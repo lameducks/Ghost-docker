@@ -6,7 +6,7 @@ Docker library for [Ghost](https://github.com/lameducks/Ghost).
 
 ### Docker Compose
 
-```
+```yaml
 version: "3.7"
 
 services:
@@ -32,9 +32,14 @@ services:
       database__connection__user: root
       database__connection__password: example
       database__connection__database: ghost
+      mail__transport: SMTP
+      mail__options__host: smtp.example.com
+      mail__options__port: 587
+      mail__from: "'Acme Support' <support@example.com>"
       privacy__useUpdateCheck: "false"
       privacy__useGravatar: "false"
       privacy__useRpcPing: "false"
+      referrerPolicy: no-referrer
 
   db:
     image: mysql:5.7
