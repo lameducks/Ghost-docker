@@ -1,6 +1,6 @@
 ## 1st stage
 
-FROM node:12-alpine3.12 as build
+FROM node:14-alpine3.12 as build
 
 ENV GHOST_VERSION 3.37.1-mod.11
 
@@ -19,7 +19,7 @@ COPY overlay /Ghost/.build/release/
 
 ## 2nd stage
 
-FROM node:12-alpine3.12
+FROM node:14-alpine3.12
 
 ENV NODE_ENV production
 ENV GHOST_INSTALL /var/lib/ghost
