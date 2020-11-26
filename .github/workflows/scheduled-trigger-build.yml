@@ -1,0 +1,19 @@
+name: Trigger build if base image is updated
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  ignition:
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        env:
+          DOCKER_HUB_TRIGGER_URL: ${{ secrets.DOCKER_HUB_TRIGGER_URL_BASE_IMAGE_UPDATED }}
+        run: |
+          export IMAGE_TIMESTAMP=$(date -d `curl -s https://hub.docker.com/v2/repositories/lameducks/ghost/tags/latest | jq -r '.tag_last_pushed'` +'%s')
+          export BASE_IMAGE_TIMESTAMP=$(date -d `curl -s https://hub.docker.com/v2/repositories/library/node/tags/14-alpine3.12 | jq -r '.tag_last_pushed'` +'%s')
+          if [ $IMAGE_TIMESTAMP -le $BASE_IMAGE_TIMESTAMP ]; then curl -XPOST -H 'Content-Type: application/json' -d '{"docker_tag": "latest"}' "$DOCKER_HUB_TRIGGER_URL"; fi
+          export BASE_IMAGE_TIMESTAMP=$(( `curl -s https://gcr.io/v2/distroless/nodejs/tags/list | jq -r '.manifest[] | select(.tag[0] == "14") | .timeUploadedMs'` / 1000 ))
+          if [ $IMAGE_TIMESTAMP -le $BASE_IMAGE_TIMESTAMP ]; then curl -XPOST -H 'Content-Type: application/json' -d '{"docker_tag": "latest-distroless"}' "$DOCKER_HUB_TRIGGER_URL"; fi
