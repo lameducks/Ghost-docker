@@ -1,4 +1,4 @@
-name: Trigger build if base image is updated
+name: Docker Hub trigger build if base image is updated
 
 on:
   schedule:
@@ -12,8 +12,33 @@ jobs:
         env:
           DOCKER_HUB_TRIGGER_URL: ${{ secrets.DOCKER_HUB_TRIGGER_URL_BASE_IMAGE_UPDATED }}
         run: |
-          export IMAGE_TIMESTAMP=$(date -d `curl -s https://hub.docker.com/v2/repositories/lameducks/ghost/tags/latest | jq -r '.tag_last_pushed'` +'%s')
-          export BASE_IMAGE_TIMESTAMP=$(date -d `curl -s https://hub.docker.com/v2/repositories/library/node/tags/14-alpine3.12 | jq -r '.tag_last_pushed'` +'%s')
-          if [ $IMAGE_TIMESTAMP -le $BASE_IMAGE_TIMESTAMP ]; then curl -XPOST -H 'Content-Type: application/json' -d '{"docker_tag": "latest"}' "$DOCKER_HUB_TRIGGER_URL"; fi
-          export BASE_IMAGE_TIMESTAMP=$(( `curl -s https://gcr.io/v2/distroless/nodejs/tags/list | jq -r '.manifest[] | select(.tag[0] == "14") | .timeUploadedMs'` / 1000 ))
-          if [ $IMAGE_TIMESTAMP -le $BASE_IMAGE_TIMESTAMP ]; then curl -XPOST -H 'Content-Type: application/json' -d '{"docker_tag": "latest-distroless"}' "$DOCKER_HUB_TRIGGER_URL"; fi
+          trigger () {
+              [ $# != 7 ] && exit 1
+              local args=("$@")
+              local prefixes=(OWN BASE)
+              for i in {0..1}; do
+                  local registry=${args[((i * 3))]:-hub.docker.com}
+                  local name=${args[((i * 3 + 1))]}
+                  [ -z "$name" ] && exit 1
+                  [[ "$registry" = "hub.docker.com" && "$name" != *"/"* ]] && name=library/$name
+                  local tag=${args[((i * 3 + 2))]:-latest}
+                  echo "${prefixes[i]}_IMAGE=$registry/$name:$tag"
+                  
+                  if [ "$registry" = "gcr.io" ]; then
+                      local timestamp_millis=$(curl -s https://gcr.io/v2/$name/tags/list | jq -r ".manifest[] | select(.tag[0] == \"$tag\") | .timeUploadedMs")
+                      local timestamps[$i]=$((timestamp_millis / 1000))
+                  else
+                      local iso8601_dt=$(curl -s "https://$registry/v2/repositories/$name/tags/$tag" | jq -r '.tag_last_pushed')
+                      local timestamps[$i]=$(date -d "$iso8601_dt" +'%s')
+                  fi
+              done
+              local diff_seconds=$((timestamps[0] - timestamps[1]))
+              printf "The difference between ${timestamps[0]} (own) and ${timestamps[1]} (base) is %d day(s) %(%H:%M:%S)T.\n" $((diff_seconds / 86400)) $((diff_seconds < 0 ? -diff_seconds : diff_seconds))
+              if [ ${timestamps[0]} -le ${timestamps[1]} ]; then
+                  curl -XPOST -H 'Content-Type: application/json' -d "{\"docker_tag\": \"${args[2]}\"}" "${args[6]}"
+              fi
+          }
+          
+          trigger '' lameducks/ghost latest            ''     node              14-alpine3.12 "$DOCKER_HUB_TRIGGER_URL"
+          echo ---
+          trigger '' lameducks/ghost latest-distroless gcr.io distroless/nodejs 14            "$DOCKER_HUB_TRIGGER_URL"
