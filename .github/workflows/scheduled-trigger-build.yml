@@ -40,5 +40,3 @@ jobs:
           }
           
           trigger '' lameducks/ghost latest            ''     node              14-alpine3.12 "$DOCKER_HUB_TRIGGER_URL"
-          echo ---
-          trigger '' lameducks/ghost latest-distroless gcr.io distroless/nodejs 14            "$DOCKER_HUB_TRIGGER_URL"
