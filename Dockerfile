@@ -4,8 +4,7 @@ FROM node:14-alpine3.12 as build
 
 ENV GHOST_VERSION 3.40.1-mod.1
 
-RUN apk update \
-    && apk upgrade --no-cache \
+RUN apk upgrade --no-cache \
     && apk add --no-cache git \
     && git clone --recurse-submodules https://github.com/lameducks/Ghost.git \
     && cd Ghost \
@@ -32,8 +31,7 @@ VOLUME ["$GHOST_CONTENT/images", "$GHOST_CONTENT/settings"]
 WORKDIR $GHOST_INSTALL
 CMD ["node", "index.js"]
 
-RUN apk update \
-    && apk upgrade --no-cache \
+RUN apk upgrade --no-cache \
     && rm -rfv /tmp/*
 
 COPY --from=build /Ghost/.build/release $GHOST_INSTALL
