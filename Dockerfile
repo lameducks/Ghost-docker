@@ -2,7 +2,7 @@
 
 FROM node:14-alpine3.12 as build
 
-ENV GHOST_VERSION 3.41.5-mod.1
+ENV GHOST_VERSION 3.41.8-mod.1
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache git \
