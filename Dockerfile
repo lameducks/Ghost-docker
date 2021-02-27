@@ -6,8 +6,8 @@ ENV GHOST_VERSION 3.41.8-mod.1
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache git \
-    && git clone --recurse-submodules https://github.com/lameducks/Ghost.git \
-    && cd Ghost \
+    && git clone --recurse-submodules https://github.com/levee223/ghost.git \
+    && cd ghost \
     && git -c advice.detachedHead=false checkout refs/tags/v$GHOST_VERSION \
     && yarn install --prod \
     && cp -rp node_modules / \
@@ -16,7 +16,7 @@ RUN apk upgrade --no-cache \
     && grunt release \
     && mv /node_modules .build/release
 
-COPY overlay /Ghost/.build/release/
+COPY overlay /ghost/.build/release/
 
 ## 2nd stage
 
@@ -34,4 +34,4 @@ CMD ["node", "index.js"]
 RUN apk upgrade --no-cache \
     && rm -rfv /tmp/*
 
-COPY --from=build /Ghost/.build/release $GHOST_INSTALL
+COPY --from=build /ghost/.build/release $GHOST_INSTALL

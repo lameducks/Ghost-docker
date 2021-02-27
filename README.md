@@ -1,6 +1,6 @@
-# Ghost-docker
+# ghost-docker
 
-Docker library for [Ghost](https://github.com/lameducks/Ghost).
+Docker library for [Ghost](https://github.com/levee223/ghost).
 
 ## How to use this image
 
@@ -11,7 +11,7 @@ version: "3.7"
 
 services:
   ghost:
-    image: lameducks/ghost:latest
+    image: levee223/ghost:latest
     restart: always
     depends_on:
       - db
